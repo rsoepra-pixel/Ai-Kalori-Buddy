@@ -163,9 +163,20 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Explicit local origins. A wildcard ("*") is invalid when credentials are
+# enabled — browsers reject that combination — so we list the dev origins the
+# frontend is actually served from (file://-opened pages send `Origin: null`).
+ALLOWED_ORIGINS = [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "null",  # pages opened directly from the filesystem (file://)
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Local dev: accept the file-based / localhost frontend.
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
