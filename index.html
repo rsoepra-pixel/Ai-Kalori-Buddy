@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glucofusion Gemini · Live Bio-Optimizer</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "system-ui", "sans-serif"] },
+          animation: {
+            "pulse-slow": "pulse 2.4s cubic-bezier(0.4,0,0.6,1) infinite",
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+    body { font-family: "Inter", sans-serif; }
+
+    /* Glassmorphism helper */
+    .glass {
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(45, 212, 191, 0.12);
+    }
+
+    /* Emergency pulsing halo */
+    .sos-pulse {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      animation: sosPulse 1.8s infinite;
+    }
+    @keyframes sosPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+      70%  { box-shadow: 0 0 0 18px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Live tracking dot */
+    .live-dot { animation: liveDot 1.4s ease-in-out infinite; }
+    @keyframes liveDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.35; transform: scale(0.75); }
+    }
+
+    /* Scrollbar */
+    .scroll-thin::-webkit-scrollbar { width: 6px; }
+    .scroll-thin::-webkit-scrollbar-thumb {
+      background: rgba(45, 212, 191, 0.3);
+      border-radius: 9999px;
+    }
+    .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+
+    /* Typing indicator */
+    .typing span {
+      display: inline-block; width: 7px; height: 7px; margin: 0 2px;
+      background: #2dd4bf; border-radius: 50%; opacity: 0.4;
+      animation: typing 1.2s infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-emerald-500/30">
+  <!-- Ambient gradient glow -->
+  <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 -right-40 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- ===================== STICKY HEADER ===================== -->
+  <header class="sticky top-0 z-40 glass border-b border-teal-400/10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-400 grid place-items-center shadow-lg shadow-emerald-500/30">
+          <i class="fa-solid fa-dna text-slate-950 text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold tracking-tight leading-none">
+            Glucofusion <span class="text-emerald-400">Gemini</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 live-dot"></span>
+            Live Bio-Optimizer Online
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Language toggle -->
+        <div class="flex items-center rounded-lg bg-slate-900/70 border border-slate-700/60 p-0.5 text-xs font-semibold">
+          <button data-lang="en" class="lang-btn px-3 py-1.5 rounded-md bg-emerald-500 text-slate-950">EN</button>
+          <button data-lang="id" class="lang-btn px-3 py-1.5 rounded-md text-slate-300">ID</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== MAIN LAYOUT ===================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- ============ LEFT: BIOMETRIC SIDEBAR ============ -->
+    <aside class="lg:col-span-4 xl:col-span-3 space-y-4">
+      <section class="glass rounded-2xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fa-solid fa-heart-pulse text-teal-400"></i>
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-300">Biometric Console</h2>
+        </div>
+
+        <form id="bioForm" class="space-y-3.5">
+          <div>
+            <label class="text-xs text-slate-400 font-medium">Gender</label>
+            <select id="gender" class="mt-1 w-full bg-slate-900/70 border border-slate-700/60 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-400 font-medium">Age</label>
+              <input id="age" type="number" value="30" min="1" max="120"
+                class="mt-1 w-full bg-slate-900/70 border border-slate-700/60 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 font-medium">Height (cm)</label>
+              <input id="height" type="number" value="170" min="50" max="250"
+                class="mt-1 w-full bg-slate-900/70 border border-slate-700/60 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 font-medium">Weight (kg)</label>
+              <input id="weight" type="number" value="75" min="20" max="400"
+                class="mt-1 w-full bg-slate-900/70 border border-slate-700/60 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 font-medium">Waist (cm)</label>
+              <input id="waist" type="number" value="85" min="30" max="250"
+                class="mt-1 w-full bg-slate-900/70 border border-slate-700/60 rounded-lg px-3 py-2 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 font-medium">Diet Path</label>
+            <div class="mt-1 grid grid-cols-2 gap-2" id="trackGroup">
+              <button type="button" data-track="low-gi"
+                class="track-btn px-3 py-2 rounded-lg text-xs font-semibold border border-emerald-500 bg-emerald-500/15 text-emerald-300">
+                <i class="fa-solid fa-leaf mr-1"></i> Low-GI
+              </button>
+              <button type="button" data-track="keto-asian"
+                class="track-btn px-3 py-2 rounded-lg text-xs font-semibold border border-slate-700/60 text-slate-300">
+                <i class="fa-solid fa-fire-flame-curved mr-1"></i> Keto-Asian
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Live metrics -->
+      <section class="glass rounded-2xl p-5 space-y-4">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 live-dot"></span>
+          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-300">Live Readout</h2>
+        </div>
+
+        <!-- BMI -->
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs text-slate-400">Body Mass Index</p>
+            <p id="bmiValue" class="text-2xl font-extrabold text-teal-300">–</p>
+          </div>
+          <span id="bmiBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-700/60 text-slate-300">—</span>
+        </div>
+
+        <div class="h-px bg-slate-700/40"></div>
+
+        <!-- TDEE -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-900/50 rounded-xl p-3">
+            <p class="text-xs text-slate-400">TDEE</p>
+            <p id="tdeeValue" class="text-xl font-bold text-emerald-300">–</p>
+            <p class="text-[10px] text-slate-500">kcal / day</p>
+          </div>
+          <div class="bg-slate-900/50 rounded-xl p-3">
+            <p class="text-xs text-slate-400">20% Deficit</p>
+            <p id="deficitValue" class="text-xl font-bold text-emerald-300">–</p>
+            <p class="text-[10px] text-slate-500">target kcal</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Hunger S.O.S -->
+      <button id="sosBtn"
+        class="sos-pulse w-full rounded-2xl bg-gradient-to-r from-red-600 to-rose-500 py-4 font-extrabold text-white text-base flex items-center justify-center gap-2 shadow-xl shadow-red-600/30 hover:scale-[1.02] transition">
+        <i class="fa-solid fa-triangle-exclamation animate-pulse"></i>
+        HUNGER S.O.S — Emergency Area
+      </button>
+    </aside>
+
+    <!-- ============ RIGHT: AI COMPANION ============ -->
+    <section class="lg:col-span-8 xl:col-span-9">
+      <div class="glass rounded-2xl flex flex-col h-[75vh] min-h-[520px]">
+        <!-- chat header -->
+        <div class="px-5 py-4 border-b border-slate-700/40 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 grid place-items-center">
+              <i class="fa-solid fa-robot text-slate-950"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-sm">Gemini AI Wellness Companion</h2>
+              <p class="text-[11px] text-emerald-400 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 live-dot"></span>
+                Live Bio-Optimizer
+              </p>
+            </div>
+          </div>
+          <span id="trackChip" class="hidden sm:inline-flex px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+            Track: Low-GI
+          </span>
+        </div>
+
+        <!-- chat history -->
+        <div id="chatHistory" class="flex-1 overflow-y-auto scroll-thin px-4 sm:px-6 py-5 space-y-4"></div>
+
+        <!-- input -->
+        <div class="px-4 sm:px-5 py-4 border-t border-slate-700/40">
+          <form id="chatForm" class="flex items-end gap-2">
+            <textarea id="chatInput" rows="1" placeholder="Ask your bio-optimizer anything…"
+              class="flex-1 resize-none bg-slate-900/70 border border-slate-700/60 rounded-xl px-4 py-3 text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none scroll-thin max-h-32"></textarea>
+            <button type="submit" id="sendBtn"
+              class="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-400 grid place-items-center text-slate-950 font-bold hover:scale-105 transition disabled:opacity-50">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== S.O.S MODAL ===================== -->
+  <div id="sosModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-md" id="sosBackdrop"></div>
+
+    <div class="relative w-full max-w-lg glass rounded-3xl p-6 sm:p-8 border border-red-500/20 shadow-2xl">
+      <button id="sosClose" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-600 to-rose-500 grid place-items-center sos-pulse">
+          <i class="fa-solid fa-triangle-exclamation text-white text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-extrabold">Craving Interceptor</h3>
+          <p class="text-xs text-slate-400">Metabolic emergency protocol engaged.</p>
+        </div>
+      </div>
+
+      <!-- input phase -->
+      <div id="sosInputPhase" class="space-y-4">
+        <div>
+          <label class="text-xs text-slate-400 font-medium">What are you craving right now?</label>
+          <input id="cravingInput" type="text" placeholder="e.g. Boba milk tea, fried chicken…"
+            class="mt-1 w-full bg-slate-900/70 border border-slate-700/60 rounded-xl px-4 py-3 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 font-medium">Classify the threat</label>
+          <div class="mt-1 grid grid-cols-2 gap-3" id="categoryGroup">
+            <button type="button" data-category="High Sugar"
+              class="category-btn px-4 py-3 rounded-xl text-sm font-bold border border-slate-700/60 text-slate-200 hover:border-amber-400/60">
+              <i class="fa-solid fa-candy-cane mr-1 text-amber-400"></i> High Sugar
+            </button>
+            <button type="button" data-category="High Fat"
+              class="category-btn px-4 py-3 rounded-xl text-sm font-bold border border-slate-700/60 text-slate-200 hover:border-orange-400/60">
+              <i class="fa-solid fa-bacon mr-1 text-orange-400"></i> High Fat
+            </button>
+          </div>
+        </div>
+        <button id="sosSubmit"
+          class="w-full rounded-xl bg-gradient-to-r from-red-600 to-rose-500 py-3.5 font-extrabold text-white flex items-center justify-center gap-2 hover:scale-[1.01] transition disabled:opacity-50">
+          <i class="fa-solid fa-shield-halved"></i> Intercept Craving
+        </button>
+      </div>
+
+      <!-- loading phase -->
+      <div id="sosLoadingPhase" class="hidden py-10 text-center">
+        <div class="inline-block w-10 h-10 border-4 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+        <p class="mt-4 text-sm font-semibold text-slate-300 animate-pulse">Analyzing Metabolic Impact…</p>
+      </div>
+
+      <!-- result phase -->
+      <div id="sosResultPhase" class="hidden space-y-4">
+        <div class="rounded-2xl bg-slate-900/70 border border-emerald-500/20 p-5">
+          <div class="flex items-center gap-2 mb-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <i class="fa-solid fa-bolt"></i> Intervention
+          </div>
+          <p id="sosResultText" class="text-sm leading-relaxed text-slate-100"></p>
+        </div>
+        <button id="sosReset"
+          class="w-full rounded-xl bg-slate-800 hover:bg-slate-700 py-3 font-semibold text-sm transition">
+          <i class="fa-solid fa-rotate-left mr-1"></i> New Interception
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== APP LOGIC ===================== -->
+  <script>
+    const API_BASE = "http://localhost:8000";
+
+    // ---------- App state ----------
+    const state = { language: "en", track: "low-gi", sosCategory: null };
+
+    // ---------- Element helpers ----------
+    const $ = (id) => document.getElementById(id);
+
+    // =====================================================================
+    //  BIOMETRIC LIVE CALCULATIONS
+    // =====================================================================
+    function computeMetrics() {
+      const gender = $("gender").value;
+      const age = parseFloat($("age").value) || 0;
+      const height = parseFloat($("height").value) || 0;
+      const weight = parseFloat($("weight").value) || 0;
+
+      // BMI
+      if (height > 0 && weight > 0) {
+        const h = height / 100;
+        const bmi = weight / (h * h);
+        $("bmiValue").textContent = bmi.toFixed(1);
+        setBmiBadge(bmi);
+      } else {
+        $("bmiValue").textContent = "–";
+      }
+
+      // Mifflin-St Jeor BMR → TDEE (lightly active factor 1.375)
+      if (age > 0 && height > 0 && weight > 0) {
+        const bmr =
+          10 * weight + 6.25 * height - 5 * age + (gender === "male" ? 5 : -161);
+        const tdee = Math.round(bmr * 1.375);
+        const deficit = Math.round(tdee * 0.8);
+        $("tdeeValue").textContent = tdee.toLocaleString();
+        $("deficitValue").textContent = deficit.toLocaleString();
+      } else {
+        $("tdeeValue").textContent = "–";
+        $("deficitValue").textContent = "–";
+      }
+    }
+
+    function setBmiBadge(bmi) {
+      const badge = $("bmiBadge");
+      let label, cls;
+      if (bmi < 18.5) {
+        label = "Underweight";
+        cls = "bg-sky-500/20 text-sky-300";
+      } else if (bmi < 25) {
+        label = "Normal";
+        cls = "bg-emerald-500/20 text-emerald-300";
+      } else if (bmi < 30) {
+        label = "Overweight";
+        cls = "bg-amber-500/20 text-amber-300";
+      } else {
+        label = "Obese";
+        cls = "bg-red-500/20 text-red-300";
+      }
+      badge.textContent = label;
+      badge.className = "px-3 py-1 rounded-full text-xs font-bold " + cls;
+    }
+
+    // Recalculate on any biometric input change
+    ["gender", "age", "height", "weight", "waist"].forEach((id) =>
+      $(id).addEventListener("input", computeMetrics)
+    );
+
+    // =====================================================================
+    //  DIET TRACK + LANGUAGE TOGGLES
+    // =====================================================================
+    document.querySelectorAll(".track-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.track = btn.dataset.track;
+        document.querySelectorAll(".track-btn").forEach((b) => {
+          const active = b === btn;
+          b.className =
+            "track-btn px-3 py-2 rounded-lg text-xs font-semibold border " +
+            (active
+              ? "border-emerald-500 bg-emerald-500/15 text-emerald-300"
+              : "border-slate-700/60 text-slate-300");
+        });
+        $("trackChip").textContent =
+          "Track: " + (state.track === "low-gi" ? "Low-GI" : "Keto-Asian");
+      });
+    });
+
+    document.querySelectorAll(".lang-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.language = btn.dataset.lang;
+        document.querySelectorAll(".lang-btn").forEach((b) => {
+          const active = b === btn;
+          b.className =
+            "lang-btn px-3 py-1.5 rounded-md " +
+            (active ? "bg-emerald-500 text-slate-950" : "text-slate-300");
+        });
+      });
+    });
+
+    // =====================================================================
+    //  CHAT INTERFACE
+    // =====================================================================
+    const chatHistory = $("chatHistory");
+
+    function appendMessage(text, sender) {
+      const wrap = document.createElement("div");
+      wrap.className =
+        "flex " + (sender === "user" ? "justify-end" : "justify-start");
+
+      const bubble = document.createElement("div");
+      bubble.className =
+        "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap " +
+        (sender === "user"
+          ? "bg-emerald-500 text-slate-950 font-medium rounded-br-sm"
+          : sender === "error"
+          ? "bg-red-500/15 text-red-200 border border-red-500/30 rounded-bl-sm"
+          : "bg-slate-800/80 text-slate-100 rounded-bl-sm");
+      bubble.textContent = text;
+
+      wrap.appendChild(bubble);
+      chatHistory.appendChild(wrap);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+      return wrap;
+    }
+
+    function showTyping() {
+      const wrap = document.createElement("div");
+      wrap.className = "flex justify-start";
+      wrap.id = "typingIndicator";
+      wrap.innerHTML =
+        '<div class="bg-slate-800/80 rounded-2xl rounded-bl-sm px-4 py-3 typing">' +
+        "<span></span><span></span><span></span></div>";
+      chatHistory.appendChild(wrap);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+    function hideTyping() {
+      const t = $("typingIndicator");
+      if (t) t.remove();
+    }
+
+    // Greeting
+    appendMessage(
+      "Welcome to your Live Bio-Optimizer. I'm your Elite Diet Kenyang Coach. Lock a diet path, then tell me your battle. Let's optimize your glucose. 🔬",
+      "ai"
+    );
+
+    // Auto-grow textarea
+    const chatInput = $("chatInput");
+    chatInput.addEventListener("input", () => {
+      chatInput.style.height = "auto";
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 128) + "px";
+    });
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        $("chatForm").requestSubmit();
+      }
+    });
+
+    $("chatForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = chatInput.value.trim();
+      if (!message) return;
+
+      appendMessage(message, "user");
+      chatInput.value = "";
+      chatInput.style.height = "auto";
+      $("sendBtn").disabled = true;
+      showTyping();
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message,
+            language: state.language,
+            track: state.track,
+          }),
+        });
+        hideTyping();
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `Server responded ${res.status}`);
+        }
+        const data = await res.json();
+        appendMessage(data.reply, "ai");
+      } catch (err) {
+        hideTyping();
+        appendMessage(
+          "⚠️ Connection to the bio-optimizer failed. Ensure the backend is running at " +
+            API_BASE +
+            ".\n(" +
+            err.message +
+            ")",
+          "error"
+        );
+      } finally {
+        $("sendBtn").disabled = false;
+        chatInput.focus();
+      }
+    });
+
+    // =====================================================================
+    //  S.O.S MODAL
+    // =====================================================================
+    const sosModal = $("sosModal");
+
+    function openSos() {
+      sosModal.classList.remove("hidden");
+      sosModal.classList.add("flex");
+      resetSos();
+    }
+    function closeSos() {
+      sosModal.classList.add("hidden");
+      sosModal.classList.remove("flex");
+    }
+    function resetSos() {
+      state.sosCategory = null;
+      $("cravingInput").value = "";
+      document.querySelectorAll(".category-btn").forEach((b) => {
+        b.className =
+          "category-btn px-4 py-3 rounded-xl text-sm font-bold border border-slate-700/60 text-slate-200";
+      });
+      $("sosInputPhase").classList.remove("hidden");
+      $("sosLoadingPhase").classList.add("hidden");
+      $("sosResultPhase").classList.add("hidden");
+    }
+
+    $("sosBtn").addEventListener("click", openSos);
+    $("sosClose").addEventListener("click", closeSos);
+    $("sosBackdrop").addEventListener("click", closeSos);
+    $("sosReset").addEventListener("click", resetSos);
+
+    document.querySelectorAll(".category-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.sosCategory = btn.dataset.category;
+        document.querySelectorAll(".category-btn").forEach((b) => {
+          const active = b === btn;
+          b.className =
+            "category-btn px-4 py-3 rounded-xl text-sm font-bold border " +
+            (active
+              ? "border-red-500 bg-red-500/15 text-white"
+              : "border-slate-700/60 text-slate-200");
+        });
+      });
+    });
+
+    $("sosSubmit").addEventListener("click", async () => {
+      const craving = $("cravingInput").value.trim();
+      if (!craving) {
+        $("cravingInput").focus();
+        $("cravingInput").classList.add("border-red-500");
+        return;
+      }
+      if (!state.sosCategory) {
+        // Nudge the user to classify the threat.
+        document.querySelectorAll(".category-btn").forEach((b) =>
+          b.classList.add("border-red-500")
+        );
+        return;
+      }
+
+      $("sosInputPhase").classList.add("hidden");
+      $("sosLoadingPhase").classList.remove("hidden");
+      $("sosResultPhase").classList.add("hidden");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/sos`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            craving,
+            category: state.sosCategory,
+            language: state.language,
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `Server responded ${res.status}`);
+        }
+        const data = await res.json();
+        $("sosResultText").textContent = data.reply;
+        $("sosLoadingPhase").classList.add("hidden");
+        $("sosResultPhase").classList.remove("hidden");
+      } catch (err) {
+        $("sosResultText").textContent =
+          "⚠️ Could not reach the bio-optimizer. Make sure the backend is live at " +
+          API_BASE +
+          ". (" +
+          err.message +
+          ")";
+        $("sosResultText").className = "text-sm leading-relaxed text-red-200";
+        $("sosLoadingPhase").classList.add("hidden");
+        $("sosResultPhase").classList.remove("hidden");
+      }
+    });
+
+    // Close modal on Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && sosModal.classList.contains("flex")) closeSos();
+    });
+
+    // Initial calculation
+    computeMetrics();
+  </script>
+</body>
+</html>
