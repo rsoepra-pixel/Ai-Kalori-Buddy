@@ -121,9 +121,15 @@
     <!-- ============ LEFT: BIOMETRIC SIDEBAR ============ -->
     <aside class="lg:col-span-4 xl:col-span-3 space-y-4">
       <section class="glass rounded-2xl p-5">
-        <div class="flex items-center gap-2 mb-4">
-          <i class="fa-solid fa-heart-pulse text-teal-400"></i>
-          <h2 class="font-bold text-sm uppercase tracking-wider text-slate-300">Biometric Console</h2>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-heart-pulse text-teal-400"></i>
+            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-300">Biometric Console</h2>
+          </div>
+          <span id="savedChip"
+            class="opacity-0 transition-opacity duration-300 text-[10px] font-semibold text-emerald-300 flex items-center gap-1">
+            <i class="fa-solid fa-check"></i> Saved
+          </span>
         </div>
 
         <form id="bioForm" class="space-y-3.5">
@@ -333,6 +339,59 @@
     const $ = (id) => document.getElementById(id);
 
     // =====================================================================
+    //  PROFILE PERSISTENCE (localStorage)
+    //  Remembers the user's biometrics + preferences across page reloads.
+    // =====================================================================
+    const STORAGE_KEY = "glucofusion.profile.v1";
+    const PROFILE_FIELDS = ["gender", "age", "height", "weight", "waist"];
+    let savedChipTimer = null;
+
+    function saveProfile() {
+      const profile = { track: state.track, language: state.language };
+      PROFILE_FIELDS.forEach((id) => (profile[id] = $(id).value));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+        flashSavedChip();
+      } catch (_) {
+        // localStorage may be unavailable (private mode / disabled) — ignore.
+      }
+    }
+
+    function loadProfile() {
+      let profile;
+      try {
+        profile = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      } catch (_) {
+        profile = null;
+      }
+      if (!profile) return;
+
+      // Restore biometric inputs.
+      PROFILE_FIELDS.forEach((id) => {
+        if (profile[id] !== undefined && profile[id] !== "") {
+          $(id).value = profile[id];
+        }
+      });
+
+      // Restore diet track + language via their existing toggle buttons.
+      if (profile.track) {
+        const t = document.querySelector(`.track-btn[data-track="${profile.track}"]`);
+        if (t) t.click();
+      }
+      if (profile.language) {
+        const l = document.querySelector(`.lang-btn[data-lang="${profile.language}"]`);
+        if (l) l.click();
+      }
+    }
+
+    function flashSavedChip() {
+      const chip = $("savedChip");
+      chip.style.opacity = "1";
+      clearTimeout(savedChipTimer);
+      savedChipTimer = setTimeout(() => (chip.style.opacity = "0"), 1400);
+    }
+
+    // =====================================================================
     //  BIOMETRIC LIVE CALCULATIONS
     // =====================================================================
     function computeMetrics() {
@@ -385,9 +444,12 @@
       badge.className = "px-3 py-1 rounded-full text-xs font-bold " + cls;
     }
 
-    // Recalculate on any biometric input change
+    // Recalculate + persist on any biometric input change
     ["gender", "age", "height", "weight", "waist"].forEach((id) =>
-      $(id).addEventListener("input", computeMetrics)
+      $(id).addEventListener("input", () => {
+        computeMetrics();
+        saveProfile();
+      })
     );
 
     // =====================================================================
@@ -406,6 +468,7 @@
         });
         $("trackChip").textContent =
           "Track: " + (state.track === "low-gi" ? "Low-GI" : "Keto-Asian");
+        saveProfile();
       });
     });
 
@@ -418,6 +481,7 @@
             "lang-btn px-3 py-1.5 rounded-md " +
             (active ? "bg-emerald-500 text-slate-950" : "text-slate-300");
         });
+        saveProfile();
       });
     });
 
@@ -625,7 +689,8 @@
       if (e.key === "Escape" && sosModal.classList.contains("flex")) closeSos();
     });
 
-    // Initial calculation
+    // Restore any saved profile, then run the initial calculation.
+    loadProfile();
     computeMetrics();
   </script>
 </body>
